@@ -66,3 +66,85 @@ Just use the django syndication framework: https://docs.djangoproject.com/en/3.0
 ### What to use for the sitemap?
 
 Here you go: https://docs.wagtail.io/en/v2.8/reference/contrib/sitemaps.html
+
+
+### Let's suppose i've added an image or a link to a richtext field. what happens when that image or link are deleted/moved ?
+
+The correct thing: They're referenced by ID in the rich text data, so they'll continue to work after moving or renaming. If they're deleted completely, that will end up as a broken link in the text.
+
+### Wagtail throws a server error when an image/document/other thing that is used in a Page using `PROTECTED` Foreign Key
+
+Here's the relevant issue: https://github.com/wagtail/wagtail/issues/1602. Since this is very difficult to fix in wagtail, just add the following middleware to your list of middleware classes to display a proper error message instead of the 500 server error:
+
+```
+
+class HandleProtectionErrorMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def process_exception(self, request, exception):
+        from django.db.models.deletion import ProtectedError
+        from django.contrib import messages
+        from django.http import HttpResponseRedirect
+
+        if isinstance(exception, ProtectedError):
+            messages.error(
+                request,
+                "The object you are trying to delete is used somewhere. Please remove any usages and try again!.",
+            )
+            return HttpResponseRedirect(request.path)
+
+        return None
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        return response
+```        
+
+# How can I order a page queryset using the wagtal-admin sorting field (the one with the 6 dots)?
+
+Use `queryset.order_by('path')`
+
+
+# I want my slugs to be properly transliterated to ASCII so instead of `/δοκιμή/` I want to see `/dokime/` as a slug.
+
+Try this code:
+
+```
+from django.utils.html import format_html
+from wagtail.core import hooks
+
+
+@hooks.register('insert_editor_js')
+def editor_js():
+    return  r"""<script>
+
+function cleanForSlug(val, useURLify) {
+    let cleaned = URLify(val, 255);
+    if (cleaned) {
+        return cleaned;
+    }
+    return '';
+}
+
+    </script>"""
+    
+``` 
+
+
+# I want to add some custom css to my wagtail admin to fix things that are are displayed broken
+
+You can try something like this:
+
+```
+@hooks.register("insert_global_admin_css", order=100)
+def global_admin_css():
+    return """
+        <style>
+            .condensed-inline-panel__card-header>h2 {
+                font-size: 0.8em;
+                white-space: normal !important;
+            }
+        </style>
+        """
+```
