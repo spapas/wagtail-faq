@@ -57,3 +57,12 @@ def register_external_link(features):
         messages.add_message(request, messages.ERROR, "No access!")
         return HttpResponseRedirect(reverse("wagtailadmin_home"))
 ```        
+
+
+### What to use for syndication (rss)?
+
+Just use the django syndication framework: https://docs.djangoproject.com/en/3.0/ref/contrib/syndication/
+
+### What to use for the sitemap?
+
+Here you go: https://docs.wagtail.io/en/v2.8/reference/contrib/sitemaps.html
