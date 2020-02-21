@@ -101,12 +101,12 @@ class HandleProtectionErrorMiddleware:
         return response
 ```        
 
-# How can I order a page queryset using the wagtal-admin sorting field (the one with the 6 dots)?
+### How can I order a page queryset using the wagtal-admin sorting field (the one with the 6 dots)?
 
 Use `queryset.order_by('path')`
 
 
-# I want my slugs to be properly transliterated to ASCII so instead of `/δοκιμή/` I want to see `/dokime/` as a slug.
+### I want my slugs to be properly transliterated to ASCII so instead of `/δοκιμή/` I want to see `/dokime/` as a slug.
 
 Try this code:
 
@@ -132,7 +132,7 @@ function cleanForSlug(val, useURLify) {
 ``` 
 
 
-# I want to add some custom css to my wagtail admin to fix things that are are displayed broken
+### I want to add some custom css to my wagtail admin to fix things that are are displayed broken
 
 You can try something like this:
 
