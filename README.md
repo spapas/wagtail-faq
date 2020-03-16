@@ -148,3 +148,26 @@ def global_admin_css():
         </style>
         """
 ```
+
+### How to show-hide icons in the wagtail richtext editor and change their ordering
+
+WAGTAILADMIN_RICH_TEXT_EDITORS = {
+    "default": {
+        "WIDGET": "wagtail.admin.rich_text.DraftailRichTextArea",
+        "OPTIONS": {
+            "features": [
+                "bold",
+                "italic",
+                "h3",
+                "h4",
+                "ol",
+                "ul",
+                "link",
+                "document-link",
+                "image",
+                # "anchor",
+                "embed",
+            ]
+        },
+    }
+}
