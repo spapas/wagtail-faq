@@ -173,3 +173,6 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
 }
 ```
 
+### Can I retrieve the type of  a page in my templates?
+
+There are various ways to do that but the simplest one seems to be using the content type of that page. Something like this: `{{ page.content_type.model }}`. You could also use `{{ page.content_type.app_label }}` to also retrieve the app label of that page. Finally, if you want a friendly representation you can use `{{ page.get_verbose_name }}`.
