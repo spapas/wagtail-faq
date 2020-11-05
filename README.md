@@ -177,7 +177,7 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
 
 There are various ways to do that but the simplest one seems to be using the content type of that page. Something like this: `{{ page.content_type.model }}`. You could also use `{{ page.content_type.app_label }}` to also retrieve the app label of that page. Finally, if you want a friendly representation you can use `{{ page.get_verbose_name }}`.
 
-### I don't want my editors to upload small images!
+### I don't want my editors to upload small images for some Pages!
 
 Sometimes the editors don't care (or don't even know) about image sizes and they will upload an image with a 200px width as the central photo of a new article; they may even not care when they see the big pixelized artifacts this will generate! The canonical way to fix this is to add a `Form` for your `Page`. To do this, first create a form class with a clean method like this:
 
@@ -197,7 +197,7 @@ class CustomPageForm(WagtailAdminPageForm):
 Then, to use this form (and its clean method) just add the following attribute to your Page model: `base_form_class = CustomPageForm`. Then when your editors submit small images they will see an error for that field!
 
 
-### I don't want my editors to be able to select small images
+### Ok fine but I don't want my editors to be able to select small images!!
 
 Continuing from the previous FAQ, you can do some acrobatics to *filter* small images from the image chooser your editors will see. This needs a lot of acrobatics though thus I'd recommend to use the canonical way mentioned above. But since I researched it here goes nothing:
 
