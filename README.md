@@ -272,3 +272,16 @@ class ImageExChooserPanel(ImageChooserPanel):
 ```
 
 The above only allows images with a width of more than 2000 pixel. You need to a *different* class for each width you need (just override `ImageExChooserPanel` setting a different `min_width`)
+
+6. Finally *use* that `ImageExChooserPanel`  in your Page: 
+
+```
+Page.content_panels + [
+	# ...
+        ImageExChooserPanel("image",),
+    ]
+```
+
+7. Profit!
+
+(I guess that some people would ask why I didn't pass the `min_width` parameter to `ImageExChooserPanel` and I needed to construct a different class for each `min_width`, i.e call it like `ImageExChooserPanel("image", min_width=2000)`. Unfortuantely, because of things I can't understand these parameters are *lost* and the `ImageExChooserPanel` was called without the `min_width`. So you need to set it on the class for it to work).
