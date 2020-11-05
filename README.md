@@ -197,3 +197,78 @@ class CustomPageForm(WagtailAdminPageForm):
 Then, to use this form (and its clean method) just add the following attribute to your Page model: `base_form_class = CustomPageForm`. Then when your editors submit small images they will see an error for that field!
 
 
+### I don't want my editors to be able to select small images
+
+Continuing from the previous FAQ, you can do some acrobatics to *filter* small images from the image chooser your editors will see. This needs a lot of acrobatics though thus I'd recommend to use the canonical way mentioned above. But since I researched it here goes nothing:
+
+1. This works with Wagtai 2.11. I haven't tested it with other Wagtail versions
+2. Start by putting the following `AdminImageChooserEx` class somewhere:
+
+```
+from wagtail.images.widgets import AdminImageChooser
+
+class AdminImageChooserEx(AdminImageChooser):
+    def __init__(self, *args, **kwargs):
+        min_width = kwargs.pop("min_width")
+        super().__init__(**kwargs)
+        self.min_width = min_width
+        self.image_model = get_image_model()
+
+    def render_html(self, name, value, attrs):
+        instance, value = self.get_instance_and_id(self.image_model, value)
+        original_field_html = super(AdminChooser, self).render_html(name, value, attrs)
+
+        return render_to_string(
+            "wagtailimages/widgets/image_chooser_ex.html",
+            {
+                "widget": self,
+                "original_field_html": original_field_html,
+                "attrs": attrs,
+                "value": value,
+                "image": instance,
+                "min_width": getattr(self, "min_width", 10),
+            },
+        )
+
+```
+
+This class expects to be called with a `min_width` argument; it will then pass it to the context of a templated named `wagtailimages/widgets/image_chooser_ex.html` renders. Notice the trickery with the `super(AdminChooser, self).render_html(...)` (somebody would expect either `super().render_html()` - py3 style or even `super(AdminImageChooser, self).render_html(...)` - py2 style); this line is correct.
+
+3. The `AdminImageChooserEx` class needs an `image_chooser_ex.html` template. So create a directory named `templates\wagtailimages\widgets` in your app and add the following to it
+
+```
+{% extends "wagtailimages/widgets/image_chooser.html" %}
+
+{% block chooser_attributes %}data-chooser-url="{% url "wagtailimages:chooser" %}?min_width={{ min_width }}"{% endblock %}
+```
+
+It just overrides the `image_chooser.html` template to pass the min_width option to the `data-chooser-url` attribute along with the image chooser url.
+
+4. Use a hook to filter the images of the chooser by their width:
+
+```
+from wagtail.core import hooks
+
+@hooks.register("construct_image_chooser_queryset")
+def show_images_with_width(images, request):
+    min_width = request.GET.get("min_width")
+    if min_width:
+        images = images.filter(width__gte=min_width)
+
+    return images
+```
+
+5. Add a panel that would *actually* set that width:
+
+```
+from wagtail.images.edit_handlers import ImageChooserPanel
+
+class ImageExChooserPanel(ImageChooserPanel):
+    min_width = 2000
+    object_type_name = "image"
+
+    def widget_overrides(self):
+        return {self.field_name: AdminImageChooserEx(min_width=self.min_width)}
+```
+
+The above only allows images with a width of more than 2000 pixel. You need to a *different* class for each width you need (just override `ImageExChooserPanel` setting a different `min_width`)
