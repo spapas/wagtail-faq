@@ -1,76 +1,25 @@
 # wagtail-faq
 
-### How can I add anchor links? 
-
-Use this: https://github.com/thibaudcolas/wagtail_draftail_experiments/tree/master/wagtail_draftail_anchors
-
-### How can I quickly add multiple related images to a Page? 
-
-Use this: https://github.com/spapas/wagtail-multi-upload
-
-### How can I add a default order for the pages displayed in a `PageChooserPanel`
-
-Use something like this:
-```
-from wagtail.core import hooks
-
-@hooks.register("construct_page_chooser_queryset")
-def fix_page_sorting(pages, request):
-    pages = pages.order_by("-latest_revision_created_at")
-    return pages
-```
-
-### How can I open external links to a new window?
-
-Something like this should work:
-
-```
-from django.utils.html import escape
-from wagtail.core import hooks
-from wagtail.core.rich_text import LinkHandler
+* [Wagtail Templates](#wagtail-templates)
+* [Improve Wagtail Begavior](#improve-wagtail-behavior)
+* [Wagtail Admin Customizing](#wagtail-admin-customizing)
+* [Images](#images)
+* [Rich Text Editor](#rich-text-editor)
+* [Sorting](#sorting)
+* [Various Questions](#various-questions)
 
 
-class NewWindowExternalLinkHandler(LinkHandler):
-    # This specifies to do this override for external links only.
-    # Other identifiers are available for other types of links.
-    identifier = "external"
+Wagtail Templates
+-----------------
 
-    @classmethod
-    def expand_db_attributes(cls, attrs):
-        href = attrs["href"]
-        # Let's add the target attr, and also rel="noopener" + noreferrer fallback.
-        # See https://github.com/whatwg/html/issues/4078.
-        return '<a href="%s" target="_blank" rel="noopener noreferrer">' % escape(href)
+### Can I retrieve the type of  a page in my templates?
+
+There are various ways to do that but the simplest one seems to be using the content type of that page. Something like this: `{{ page.content_type.model }}`. You could also use `{{ page.content_type.app_label }}` to also retrieve the app label of that page. Finally, if you want a friendly representation you can use `{{ page.get_verbose_name }}`.
 
 
-@hooks.register("register_rich_text_features")
-def register_external_link(features):
-    features.register_link_type(NewWindowExternalLinkHandler)
-```
+Improve Wagtail Begavior
+------------------------
 
-### How can I check if a user can publish pages?
-
-```
-    from wagtail.core.models import UserPagePermissionsProxy
-    
-    if not UserPagePermissionsProxy(request.user).can_publish_pages():
-        messages.add_message(request, messages.ERROR, "No access!")
-        return HttpResponseRedirect(reverse("wagtailadmin_home"))
-```        
-
-
-### What to use for syndication (rss)?
-
-Just use the django syndication framework: https://docs.djangoproject.com/en/3.0/ref/contrib/syndication/
-
-### What to use for the sitemap?
-
-Here you go: https://docs.wagtail.io/en/v2.8/reference/contrib/sitemaps.html
-
-
-### Let's suppose i've added an image or a link to a richtext field. what happens when that image or link are deleted/moved ?
-
-The correct thing: They're referenced by ID in the rich text data, so they'll continue to work after moving or renaming. If they're deleted completely, that will end up as a broken link in the text.
 
 ### Wagtail throws a server error when an image/document/other thing that is used in a Page using `PROTECTED` Foreign Key
 
@@ -101,10 +50,6 @@ class HandleProtectionErrorMiddleware:
         return response
 ```        
 
-### How can I order a page queryset using the wagtal-admin sorting field (the one with the 6 dots)?
-
-Use `queryset.order_by('path')`
-
 
 ### I want my slugs to be properly transliterated to ASCII so instead of `/δοκιμή/` I want to see `/dokime/` as a slug.
 
@@ -132,9 +77,13 @@ function cleanForSlug(val, useURLify) {
 ``` 
 
 
+
+Wagtail Admin customizing
+-------------------------
+
 ### I want to add some custom css to my wagtail admin to fix things that are are displayed broken
 
-You can try something like this:
+You can use `insert_global_admin_css`, for example try something like this:
 
 ```
 @hooks.register("insert_global_admin_css", order=100)
@@ -148,6 +97,43 @@ def global_admin_css():
         </style>
         """
 ```
+
+Rich Text Editor
+----------------
+
+### How can I add anchor links? 
+
+Use this: https://github.com/thibaudcolas/wagtail_draftail_experiments/tree/master/wagtail_draftail_anchors
+
+
+### How can I open external links to a new window?
+
+Something like this should work:
+
+```
+from django.utils.html import escape
+from wagtail.core import hooks
+from wagtail.core.rich_text import LinkHandler
+
+
+class NewWindowExternalLinkHandler(LinkHandler):
+    # This specifies to do this override for external links only.
+    # Other identifiers are available for other types of links.
+    identifier = "external"
+
+    @classmethod
+    def expand_db_attributes(cls, attrs):
+        href = attrs["href"]
+        # Let's add the target attr, and also rel="noopener" + noreferrer fallback.
+        # See https://github.com/whatwg/html/issues/4078.
+        return '<a href="%s" target="_blank" rel="noopener noreferrer">' % escape(href)
+
+
+@hooks.register("register_rich_text_features")
+def register_external_link(features):
+    features.register_link_type(NewWindowExternalLinkHandler)
+```
+
 
 ### How to show-hide icons in the wagtail richtext editor and change their ordering
 ```
@@ -173,9 +159,14 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
 }
 ```
 
-### Can I retrieve the type of  a page in my templates?
 
-There are various ways to do that but the simplest one seems to be using the content type of that page. Something like this: `{{ page.content_type.model }}`. You could also use `{{ page.content_type.app_label }}` to also retrieve the app label of that page. Finally, if you want a friendly representation you can use `{{ page.get_verbose_name }}`.
+
+Images
+------
+
+### How can I quickly add multiple related images to a Page? 
+
+Use this: https://github.com/spapas/wagtail-multi-upload
 
 ### I don't want my editors to upload small images for some Pages!
 
@@ -285,3 +276,53 @@ Page.content_panels + [
 7. Profit!
 
 (I guess that some people would ask why I didn't pass the `min_width` parameter to `ImageExChooserPanel` and I needed to construct a different class for each `min_width`, i.e call it like `ImageExChooserPanel("image", min_width=2000)`. Unfortuantely, because of things I can't understand these parameters are *lost* and the `ImageExChooserPanel` was called without the `min_width`. So you need to set it on the class for it to work).
+
+Sorting
+-------
+
+
+
+### How can I add a default order for the pages displayed in a `PageChooserPanel`
+
+Use something like this:
+```
+from wagtail.core import hooks
+
+@hooks.register("construct_page_chooser_queryset")
+def fix_page_sorting(pages, request):
+    pages = pages.order_by("-latest_revision_created_at")
+    return pages
+```
+
+### How can I order a page queryset using the wagtal-admin sorting field (the one with the 6 dots)?
+
+Use `queryset.order_by('path')`
+
+
+Various Questions
+-----------------
+
+
+### How can I check if a user can publish pages?
+
+```
+    from wagtail.core.models import UserPagePermissionsProxy
+    
+    if not UserPagePermissionsProxy(request.user).can_publish_pages():
+        messages.add_message(request, messages.ERROR, "No access!")
+        return HttpResponseRedirect(reverse("wagtailadmin_home"))
+```        
+
+
+### Let's suppose i've added an image or a link to a richtext field. what happens when that image or link are deleted/moved ?
+
+The correct thing: They're referenced by ID in the rich text data, so they'll continue to work after moving or renaming. If they're deleted completely, that will end up as a broken link in the text.
+
+### What to use for syndication (rss)?
+
+Just use the django syndication framework: https://docs.djangoproject.com/en/3.0/ref/contrib/syndication/
+
+### What to use for the sitemap?
+
+Here you go: https://docs.wagtail.io/en/v2.8/reference/contrib/sitemaps.html
+
