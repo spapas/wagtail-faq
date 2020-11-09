@@ -12,10 +12,36 @@
 Wagtail Templates
 -----------------
 
+### How to properly get the url of a page
+
+Use `{% pageurl page %}` where page must be a proper wagtail page (or else an exception will be thrown) or `{% slugurl slug %}` where `slug` is a string; `slugurl` will return None if the slug is not found. Also please be extra careful with this because if multiple pages exist with the same slug, the page chosen is undetermined!
+
 ### Can I retrieve the type of  a page in my templates?
 
 There are various ways to do that but the simplest one seems to be using the content type of that page. Something like this: `{{ page.content_type.model }}`. You could also use `{{ page.content_type.app_label }}` to also retrieve the app label of that page. Finally, if you want a friendly representation you can use `{{ page.get_verbose_name }}`.
 
+### How to display breadcrumbs for my pages?
+
+You can create a template snippet like this one:
+
+```
+{% load wagtailcore_tags %}
+
+{% if page.get_ancestors|length > 1 %}
+<ul class="breadcrumb">
+    {% for ancestor_page in page.get_ancestors %}
+        {% if not ancestor_page.is_root %}
+            {% if ancestor_page.depth > 2 %}
+                <li class="breadcrumb-item"><a href="{% pageurl ancestor_page %}" title="{{ ancestor_page.title }}">{{ ancestor_page.title|truncatewords:4 }}</a></li>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    <li class="breadcrumb-item">{{ page.title|truncatewords:4 }}</li>
+</ul>
+{% endif %}
+```
+
+The just `{% include %}` that template wherever you wish to display the breadcrumbs. Please notice that I display only pages that have a `depth > 2` because of needs of how my wagtail site works; just use the proper depth for your own case. Also, because some pages may have long titles I'm using `truncatewords` to properly cut-off long titles.
 
 Improve Wagtail Begavior
 ------------------------
@@ -134,7 +160,6 @@ def register_external_link(features):
     features.register_link_type(NewWindowExternalLinkHandler)
 ```
 
-
 ### How to show-hide icons in the wagtail richtext editor and change their ordering
 ```
 WAGTAILADMIN_RICH_TEXT_EDITORS = {
@@ -158,8 +183,6 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
     }
 }
 ```
-
-
 
 Images
 ------
@@ -279,8 +302,6 @@ Page.content_panels + [
 
 Sorting
 -------
-
-
 
 ### How can I add a default order for the pages displayed in a `PageChooserPanel`
 
