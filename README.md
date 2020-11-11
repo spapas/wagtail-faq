@@ -4,6 +4,7 @@
 * [Improve Wagtail Begavior](#improve-wagtail-behavior)
 * [Wagtail Admin Customizing](#wagtail-admin-customizing)
 * [Images](#images)
+* [Documents](#documents)
 * [Rich Text Editor](#rich-text-editor)
 * [Sorting](#sorting)
 * [Various Questions](#various-questions)
@@ -45,7 +46,6 @@ The just `{% include %}` that template wherever you wish to display the breadcru
 
 Improve Wagtail Begavior
 ------------------------
-
 
 ### Wagtail throws a server error when an image/document/other thing that is used in a Page using `PROTECTED` Foreign Key
 
@@ -299,6 +299,56 @@ Page.content_panels + [
 7. Profit!
 
 (I guess that some people would ask why I didn't pass the `min_width` parameter to `ImageExChooserPanel` and I needed to construct a different class for each `min_width`, i.e call it like `ImageExChooserPanel("image", min_width=2000)`. Unfortuantely, because of things I can't understand these parameters are *lost* and the `ImageExChooserPanel` was called without the `min_width`. So you need to set it on the class for it to work).
+
+### Is it possible to have pritected/private images?
+
+No it ain't. By default all images are served directly from your http server and you can't have any sort of permissions check for them. You can have private documents though so you could theoretically upload your private/permissioned images as documents.
+
+Documents
+---------
+
+### Can I have pritected/private documents?
+
+Yes you definitely can by adding the documents to a specific collection and allowing only particular users to view the documents of that collection. However there are some caveats that depend on the way you have configured your wagtail document serving method *and* your media storage backend. The documentation for that is here: https://docs.wagtail.io/en/stable/reference/settings.html#documents but I'll give you some quick tips on how to configure things for two following scenarios when you have your documents stored locally on your server (if you're using S3 or similar things then you're on your own). 
+
+Wagtail by default (if you save your files locally at least) will stream the files through your python workers; i.e these processes will be tied to serving the file for as much time as the file downloading takes. If you have 4 workers (which is a common ammount) and have 4 people with slow connections downloading a large file at the same time then your site *will not work anymore*! This is a huge problem and you need to fix it before going to production.
+
+### How can I configure my document serving if I don't have private documents?
+
+This is easy; just use the following setting: `WAGTAILDOCS_SERVE_METHOD = direct`. This will configure wagtail so when you use `{{ document.url }}` it will output the path of your file inside your `MEDIA_URL`; so if you have configured your web server to properly serve your media and static files it will just be served directly from there!
+
+Please notice that if you do this you can't use collections to set permissions on your docs since everything will be server through your web server.
+
+### How can I configure my document serving if I do have private documents?
+
+First of all, by default wagtail uses the `WAGTAILDOCS_SERVE_METHOD = serve_view` setting. This means that when you use `{{ document.url }}` it will output the name of a view that would serve the document. This view does the permissions checks for the collection and then serves the document. What is important to do here is to *not* serve the document through your python worker but use your web server (i.e nginx) for that. This is a common problem in the django world (have permissions on media files) and is solved using django-sendfile (https://github.com/johnsensible/django-sendfile). With a few words as possible, using this mechanism you tell nginx to "hide" your protected documents folder and *only* serve it if he gets a proper response from your application. I.e you request the document serving view and if the permissions pass the djagno-sendfile will return a response telling nginx to serve a file. Nginx will see that response and instead of returning it to the request it will actually return the file. If you want to learn more take a look at these two SO questions  https://stackoverflow.com/questions/7296642/django-understanding-x-sendfile and https://stackoverflow.com/questions/28166784/restricting-access-to-private-file-downloads-in-django.
+
+Ok, now how to properly configure wagtail for this. First of all, add the following settings to your settings (`MEDIA_*` should be there but anyway):
+
+```
+WAGTAILDOCS_SERVE_METHOD = "serve_view" # We talked about this
+SENDFILE_BACKEND = "sendfile.backends.nginx" # If you are using nginx; there is support for other web sevrers
+MEDIA_URL = "/media/"
+MEDIA_ROOT = "/home/serafeim/hcgwagtail/media"
+SENDFILE_ROOT = "/home/serafeim/hcgwagtail/media/documents"
+SENDFILE_URL = "/media/documents/"
+```
+
+The above tells django that the docs should be server through nginx and where the documents will be. Finally, add the following two entries in your nginx configuration:
+
+```
+    location /media/documents/ {
+        internal;
+        alias /home/serafeim/hcgwagtail/hcgwagtail/media/documents/;
+    }
+
+    location /media/ {
+        alias /home/serafeim/hcgwagtail/hcgwagtail/media/;
+    }
+```
+
+The first one tells nginx that the files in /media/documents will be served through the sendfile mechanism I described before; the second one is the common media serving directive. Notice that the 1st one will match first so documents won't be served directly; please make sure that this really is the case by trying to get an uploaded document directly by its url (i.e `/media/documents/...`).
+
 
 Sorting
 -------
