@@ -13,13 +13,13 @@
 Wagtail Templates
 -----------------
 
-### How to properly get the url of a page
+### How to properly get the URL of a page
 
-Use `{% pageurl page %}` where page must be a proper wagtail page (or else an exception will be thrown) or `{% slugurl slug %}` where `slug` is a string; `slugurl` will return None if the slug is not found. Also please be extra careful with this because if multiple pages exist with the same slug, the page chosen is undetermined!
+Use `{% pageurl page %}` where `page` must be a proper Wagtail page (or else an exception will be thrown) or `{% slugurl slug %}` where `slug` is a string; `slugurl` will return `None` if the slug is not found. Also, please be extra careful with this because if multiple pages exist with the same slug, the page chosen is undetermined!
 
-### Can I retrieve the type of  a page in my templates?
+### Can I retrieve the type of a page in my templates?
 
-There are various ways to do that but the simplest one seems to be using the content type of that page. Something like this: `{{ page.content_type.model }}`. You could also use `{{ page.content_type.app_label }}` to also retrieve the app label of that page. Finally, if you want a friendly representation you can use `{{ page.get_verbose_name }}`.
+There are various ways to do that but the simplest one seems to be using the content type of that page. Something like this: `{{ page.content_type.model }}`. You could also use `{{ page.content_type.app_label }}` to also retrieve the app label of that page. Finally, if you want a friendly representation, you can use `{{ page.get_verbose_name }}`.
 
 ### How to display breadcrumbs for my pages?
 
@@ -42,14 +42,14 @@ You can create a template snippet like this one:
 {% endif %}
 ```
 
-The just `{% include %}` that template wherever you wish to display the breadcrumbs. Please notice that I display only pages that have a `depth > 2` because of needs of how my wagtail site works; just use the proper depth for your own case. Also, because some pages may have long titles I'm using `truncatewords` to properly cut-off long titles.
+Use the `{% include %}` tag to include that template wherever you wish to display the breadcrumbs. Please notice that I display only pages that have a `depth > 2` because of how my Wagtail site works; just use the proper depth for your own case. Also, because some pages may have long titles, I'm using `truncatewords` to properly cut-off long titles.
 
-Improve Wagtail Begavior
-------------------------
+Improve Wagtail Behaviour
+-------------------------
 
 ### Wagtail throws a server error when an image/document/other thing that is used in a Page using `PROTECTED` Foreign Key
 
-Here's the relevant issue: https://github.com/wagtail/wagtail/issues/1602. Since this is very difficult to fix in wagtail, just add the following middleware to your list of middleware classes to display a proper error message instead of the 500 server error:
+Here's the relevant issue: https://github.com/wagtail/wagtail/issues/1602. Since this is very difficult to fix in Wagtail, just add the following middleware to your list of middleware classes to display a proper error message instead of the 500 server error:
 
 ```
 
@@ -77,7 +77,7 @@ class HandleProtectionErrorMiddleware:
 ```        
 
 
-### I want my slugs to be properly transliterated to ASCII so instead of `/δοκιμή/` I want to see `/dokime/` as a slug.
+### I want my slugs to be properly transliterated to ASCII so instead of `/δοκιμή/` I want to see `/dokime/` as a slug
 
 Try this code:
 
@@ -104,12 +104,12 @@ function cleanForSlug(val, useURLify) {
 
 
 
-Wagtail Admin customizing
--------------------------
+Wagtail Admin customization
+---------------------------
 
-### I want to add some custom css to my wagtail admin to fix things that are are displayed broken
+### I want to add some custom css to my Wagtail admin to fix things that are displayed broken
 
-You can use `insert_global_admin_css`, for example try something like this:
+You can use `insert_global_admin_css`. For example, try something like this:
 
 ```
 @hooks.register("insert_global_admin_css", order=100)
@@ -160,7 +160,7 @@ def register_external_link(features):
     features.register_link_type(NewWindowExternalLinkHandler)
 ```
 
-### How to show-hide icons in the wagtail richtext editor and change their ordering
+### How to show-hide icons in the Wagtail rich-text editor and change their ordering
 ```
 WAGTAILADMIN_RICH_TEXT_EDITORS = {
     "default": {
@@ -187,13 +187,13 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
 Images
 ------
 
-### How can I quickly add multiple related images to a Page? 
+### How can I quickly add multiple related images to a page? 
 
 Use this: https://github.com/spapas/wagtail-multi-upload
 
-### I don't want my editors to upload small images for some Pages!
+### I don't want my editors to upload small images for some pages!
 
-Sometimes the editors don't care (or don't even know) about image sizes and they will upload an image with a 200px width as the central photo of a new article; they may even not care when they see the big pixelized artifacts this will generate! The canonical way to fix this is to add a `Form` for your `Page`. To do this, first create a form class with a clean method like this:
+Sometimes the editors don't care (or don't even know) about image sizes, and they will upload an image with a 200px width as the central photo of a new article; they may even not care when they see the big pixelized artefacts this will generate! The canonical way to fix this is to add a `Form` for your `Page`. To do this, first create a form class with a clean method like this:
 
 ```
 from wagtail.admin.forms import WagtailAdminPageForm
@@ -213,9 +213,9 @@ Then, to use this form (and its clean method) just add the following attribute t
 
 ### Ok fine but I don't want my editors to be able to select small images!!
 
-Continuing from the previous FAQ, you can do some acrobatics to *filter* small images from the image chooser your editors will see. This needs a lot of acrobatics though thus I'd recommend to use the canonical way mentioned above. But since I researched it here goes nothing:
+Continuing from the previous FAQ, you can do some acrobatics to *filter* small images from the image chooser your editors will see. This needs a lot of acrobatics though thus I'd recommend using the canonical way mentioned above. But since I researched it here goes nothing:
 
-1. This works with Wagtai 2.11. I haven't tested it with other Wagtail versions
+1. This works with Wagtail 2.11. I haven't tested it with other Wagtail versions
 2. Start by putting the following `AdminImageChooserEx` class somewhere:
 
 ```
@@ -256,7 +256,7 @@ This class expects to be called with a `min_width` argument; it will then pass i
 {% block chooser_attributes %}data-chooser-url="{% url "wagtailimages:chooser" %}?min_width={{ min_width }}"{% endblock %}
 ```
 
-It just overrides the `image_chooser.html` template to pass the min_width option to the `data-chooser-url` attribute along with the image chooser url.
+It just overrides the `image_chooser.html` template to pass the min_width option to the `data-chooser-url` attribute along with the image chooser URL.
 
 4. Use a hook to filter the images of the chooser by their width:
 
@@ -287,7 +287,7 @@ class ImageExChooserPanel(ImageChooserPanel):
 
 The above only allows images with a width of more than 2000 pixel. You need to a *different* class for each width you need (just override `ImageExChooserPanel` setting a different `min_width`)
 
-6. Finally *use* that `ImageExChooserPanel`  in your Page: 
+6. Finally *use* that `ImageExChooserPanel`  in your page: 
 
 ```
 Page.content_panels + [
@@ -298,20 +298,20 @@ Page.content_panels + [
 
 7. Profit!
 
-(I guess that some people would ask why I didn't pass the `min_width` parameter to `ImageExChooserPanel` and I needed to construct a different class for each `min_width`, i.e call it like `ImageExChooserPanel("image", min_width=2000)`. Unfortuantely, because of things I can't understand these parameters are *lost* and the `ImageExChooserPanel` was called without the `min_width`. So you need to set it on the class for it to work).
+(I guess that some people would ask why I didn't pass the `min_width` parameter to `ImageExChooserPanel` and I needed to construct a different class for each `min_width`, i.e call it like `ImageExChooserPanel("image", min_width=2000)`. Unfortunately, because of things I can't understand these parameters are *lost* and the `ImageExChooserPanel` was called without the `min_width`. So you need to set it on the class for it to work).
 
-### Is it possible to have pritected/private images?
+### Is it possible to have protected/private images?
 
-No it ain't. By default all images are served directly from your http server and you can't have any sort of permissions check for them. You can have private documents though so you could theoretically upload your private/permissioned images as documents.
+No, it isn't. By default, all images are served directly from your HTTP server and you can't have any permissions check for them. You can have private documents though, so you could theoretically upload your private/protected images as documents.
 
 Documents
 ---------
 
-### Can I have pritected/private documents?
+### Can I have protected/private documents?
 
-Yes you definitely can by adding the documents to a specific collection and allowing only particular users to view the documents of that collection. However there are some caveats that depend on the way you have configured your wagtail document serving method *and* your media storage backend. The documentation for that is here: https://docs.wagtail.io/en/stable/reference/settings.html#documents but I'll give you some quick tips on how to configure things for two following scenarios when you have your documents stored locally on your server (if you're using S3 or similar things then you're on your own). 
+Yes, you definitely can by adding the documents to a specific collection and allowing only particular users to view the documents of that collection. However, there are some caveats that depend on the way you have configured your wagtail document serving method *and* your media storage backend. The documentation for that is here: https://docs.wagtail.io/en/stable/reference/settings.html#documents but I'll give you some quick tips on how to configure things for two following scenarios when you have your documents stored locally on your server (if you're using S3 or similar things then you're on your own). 
 
-Wagtail by default (if you save your files locally at least) will stream the files through your python workers; i.e these processes will be tied to serving the file for as much time as the file downloading takes. If you have 4 workers (which is a common ammount) and have 4 people with slow connections downloading a large file at the same time then your site *will not work anymore*! This is a huge problem and you need to fix it before going to production.
+Wagtail by default (if you save your files locally at least) will stream the files through your python workers; i.e. these processes will be tied to serving the file for as much time as the file downloading takes. If you have four workers (which is a common amount) and have four people with slow connections downloading a large file at the same time then your site *will not work anymore*! This is a huge problem, and you need to fix it before going to production.
 
 ### How can I configure my document serving if I don't have private documents?
 
@@ -321,9 +321,9 @@ Please notice that if you do this you can't use collections to set permissions o
 
 ### How can I configure my document serving if I do have private documents?
 
-First of all, by default wagtail uses the `WAGTAILDOCS_SERVE_METHOD = serve_view` setting. This means that when you use `{{ document.url }}` it will output the name of a view that would serve the document. This view does the permissions checks for the collection and then serves the document. What is important to do here is to *not* serve the document through your python worker but use your web server (i.e nginx) for that. This is a common problem in the django world (have permissions on media files) and is solved using django-sendfile (https://github.com/johnsensible/django-sendfile). With a few words as possible, using this mechanism you tell nginx to "hide" your protected documents folder and *only* serve it if he gets a proper response from your application. I.e you request the document serving view and if the permissions pass the djagno-sendfile will return a response telling nginx to serve a file. Nginx will see that response and instead of returning it to the request it will actually return the file. If you want to learn more take a look at these two SO questions  https://stackoverflow.com/questions/7296642/django-understanding-x-sendfile and https://stackoverflow.com/questions/28166784/restricting-access-to-private-file-downloads-in-django.
+First of all, by default Wagtail uses the `WAGTAILDOCS_SERVE_METHOD = serve_view` setting. This means that when you use `{{ document.url }}` it will output the name of a view that would serve the document. This view does the permissions checks for the collection and then serves the document. What is important to do here is to *not* serve the document through your python worker but use your web server (i.e. Nginx) for that. This is a common problem in the Django world (have permissions on media files) and is solved using `django-sendfile` (https://github.com/johnsensible/django-sendfile). With a few words as possible, using this mechanism you tell Nginx to "hide" your protected documents folder and *only* serve it if he gets a proper response from your application. I.e you request the document serving view and if the permissions pass the `django-sendfile` will return a response telling Nginx to serve a file. Nginx will see that response and instead of returning it to the request it will actually return the file. If you want to learn more take a look at these two SO questions  https://stackoverflow.com/questions/7296642/django-understanding-x-sendfile and https://stackoverflow.com/questions/28166784/restricting-access-to-private-file-downloads-in-django.
 
-Ok, now how to properly configure wagtail for this. First of all, add the following settings to your settings (`MEDIA_*` should be there but anyway):
+Ok, now how to properly configure Wagtail for this. First of all, add the following settings to your settings (`MEDIA_*` should be there but anyway):
 
 ```
 WAGTAILDOCS_SERVE_METHOD = "serve_view" # We talked about this
@@ -334,7 +334,7 @@ SENDFILE_ROOT = "/home/serafeim/hcgwagtail/media/documents"
 SENDFILE_URL = "/media/documents/"
 ```
 
-The above tells django that the docs should be server through nginx and where the documents will be. Finally, add the following two entries in your nginx configuration:
+The above tells Django that the docs should be server through nginx and where the documents will be. Finally, add the following two entries in your Nginx configuration:
 
 ```
     location /media/documents/ {
@@ -347,7 +347,7 @@ The above tells django that the docs should be server through nginx and where th
     }
 ```
 
-The first one tells nginx that the files in /media/documents will be served through the sendfile mechanism I described before; the second one is the common media serving directive. Notice that the 1st one will match first so documents won't be served directly; please make sure that this really is the case by trying to get an uploaded document directly by its url (i.e `/media/documents/...`).
+The first one tells Nginx that the files in `/media/documents` will be served through the sendfile mechanism I described before; the second one is the common media serving directive. Notice that the first one will match first so documents won't be served directly; please make sure that this really is the case by trying to get an uploaded document directly by its URL (i.e. `/media/documents/...`).
 
 
 Sorting
@@ -365,7 +365,7 @@ def fix_page_sorting(pages, request):
     return pages
 ```
 
-### How can I order a page queryset using the wagtal-admin sorting field (the one with the 6 dots)?
+### How can I order a page queryset using Wagtail's admin sorting field (the one with the 6 dots)?
 
 Use `queryset.order_by('path')`
 
@@ -385,13 +385,13 @@ Various Questions
 ```        
 
 
-### Let's suppose i've added an image or a link to a richtext field. what happens when that image or link are deleted/moved ?
+### Let's suppose I've added an image or a link to a rich-text field, what happens when that image or link are deleted/moved?
 
 The correct thing: They're referenced by ID in the rich text data, so they'll continue to work after moving or renaming. If they're deleted completely, that will end up as a broken link in the text.
 
-### What to use for syndication (rss)?
+### What to use for syndication (RSS)?
 
-Just use the django syndication framework: https://docs.djangoproject.com/en/3.0/ref/contrib/syndication/
+Just use Django's syndication framework: https://docs.djangoproject.com/en/3.0/ref/contrib/syndication/
 
 ### What to use for the sitemap?
 
