@@ -125,6 +125,51 @@ def global_admin_css():
         """
 ```
 
+### How could I run custom clean checks when saving a Page through the Wagtail Admin?
+
+You can add a custom wagtail form that inherits from `WagtailAdminPageForm` and overrides its `clean()` method. Something like this:
+
+```
+from wagtail.admin.forms.pages import WagtailAdminPageForm
+
+class CustomPageForm(WagtailAdminPageForm):
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data['value'] == 42:
+	    self.add_error(
+		"value", "Value cannot be 42!"
+	    )
+
+        return cleaned_data
+```
+
+Then use `CustomPageForm` for your page's form using the `base_form_class` attribute, i.e:
+
+```
+class CustomPage(Page):
+    base_form_class = IntPageForm
+```
+
+### How could I validate the data of inline panels?
+
+If your page has a `Parental` relation with a model and render the field through an `InlinePanel` (check this for more info https://docs.wagtail.io/en/v2.0/reference/pages/panels.html#inline-panels) then your form will render the inline panel as a formset. To validate a field in that formset you can use the following clean method in your custom form:
+
+```
+    def clean(self):
+        cleaned_data = super().clean()
+	# You can run checks for the main page here
+        for form in self.formsets["custompage_related_documents"].forms: # this is the same as the related_name parameter of your ParentalKey
+            if form.is_valid():
+                cleaned_form_data = form.clean()
+                doc = cleaned_form_data["document"]
+                if doc and doc.collection.name != "INTERNAL DOCUMENTS":
+                    form.add_error(
+                        "document", "Only internal documents are allowed!"
+                    )
+
+        return cleaned_data
+```	
+
 Rich Text Editor
 ----------------
 
@@ -210,6 +255,10 @@ class CustomPageForm(WagtailAdminPageForm):
 ```
 
 Then, to use this form (and its clean method) just add the following attribute to your Page model: `base_form_class = CustomPageForm`. Then when your editors submit small images they will see an error for that field!
+
+### What if my images are in an InlinePanel ?
+
+See the corresponding answer for [Wagtail Admin Customizing](#wagtail-admin-customizing).
 
 
 ### Ok fine but I don't want my editors to be able to select small images!!
