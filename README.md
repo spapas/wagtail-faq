@@ -375,7 +375,7 @@ Searching
 
 ### How will searching work if I have private pages?
 
-By default search results *will* contain all pages even if the user doesn't have permissions on them. So he'll see the page but when he clicks on it he'll need to login (or get a permission error if he doesn't have permission). To display only the pages that are public (i.e visible to everybody) you can use `public()` https://docs.wagtail.io/en/v2.11.1/reference/pages/queryset_reference.html#wagtail.core.query.PageQuerySet.public, for example `Page.objects.live().public().search("Hello world!")` - notice that `live()` is also needed to skip non-published pages.
+By default search results *will* contain all pages even if the current user doesn't have permissions to view them. So he'll see the page but when he clicks on it he'll need to login (or get a permission error if he doesn't have permission). To display only the pages that are public (i.e visible to everybody) you can use `public()` https://docs.wagtail.io/en/v2.11.1/reference/pages/queryset_reference.html#wagtail.core.query.PageQuerySet.public, for example `Page.objects.live().public().search("Hello world!")` - notice that `live()` is also needed to skip non-published pages.
 
 ### Can I display private pages in results if the user has permissions to view them?
 
