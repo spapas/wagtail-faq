@@ -7,6 +7,7 @@
 * [Documents](#documents)
 * [Rich Text Editor](#rich-text-editor)
 * [Sorting](#sorting)
+* [Searching](#searching)
 * [Various Questions](#various-questions)
 
 
@@ -368,6 +369,33 @@ def fix_page_sorting(pages, request):
 ### How can I order a page queryset using Wagtail's admin sorting field (the one with the 6 dots)?
 
 Use `queryset.order_by('path')`
+
+Searching
+---------
+
+### How will searching work if I have private pages?
+
+By default search results *will* contain all pages even if the user doesn't have permissions on them. So he'll see the page but when he clicks on it he'll need to login (or get a permission error if he doesn't have permission). To display only the pages that are public (i.e visible to everybody) you can use `public()` https://docs.wagtail.io/en/v2.11.1/reference/pages/queryset_reference.html#wagtail.core.query.PageQuerySet.public, for example `Page.objects.live().public().search("Hello world!")` - notice that `live()` is also needed to skip non-published pages.
+
+### Can I display private pages in results if the user has permissions to view them?
+
+Let's suppose you've got a Page queryset with all the results of a search. You can use the following snippet to remove pages that the current user doesn't have permission to view:
+
+```
+from wagtail.wagtailcore.models import PageViewRestriction
+def exclude_invisible_pages(request, pages):
+    # Get list of pages that are restricted to this user
+    restricted_pages = [
+        restriction.page
+        for restriction in PageViewRestriction.objects.all().select_related('page')
+        if not restriction.accept_request(request)
+    ]
+    # Exclude the restricted pages and their descendants from the queryset
+    for restricted_page in restricted_pages:
+        pages = pages.not_descendant_of(restricted_page, inclusive=True)
+    return pages
+```
+
 
 
 Various Questions
