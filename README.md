@@ -2,7 +2,7 @@
 
 * [Wagtail Templates](#wagtail-templates)
 * [Improve Wagtail Begavior](#improve-wagtail-behavior)
-* [Wagtail Admin Customizing](#wagtail-admin-customizing)
+* [Wagtail Admin Customization](#wagtail-admin-customization)
 * [Images](#images)
 * [Documents](#documents)
 * [Rich Text Editor](#rich-text-editor)
@@ -258,7 +258,7 @@ Then, to use this form (and its clean method) just add the following attribute t
 
 ### What if my images are in an InlinePanel ?
 
-See the corresponding answer for [Wagtail Admin Customizing](#wagtail-admin-customizing).
+See the corresponding answer for [Wagtail Admin Customizing](#wagtail-admin-customization).
 
 
 ### Ok fine but I don't want my editors to be able to select small images!!
