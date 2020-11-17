@@ -8,6 +8,7 @@
 * [Rich Text Editor](#rich-text-editor)
 * [Sorting](#sorting)
 * [Searching](#searching)
+* [Wagtail API](#wagtail-api)
 * [Various Questions](#various-questions)
 
 
@@ -445,7 +446,49 @@ def exclude_invisible_pages(request, pages):
     return pages
 ```
 
+Wagtail API
+-----------
 
+### Why the Wagtail API does not return private pages?
+
+By default the Wagtail API will display only public pages. You can change it by overriding the `get_base_queryset` method of `PagesAPIViewSet`. So, in your api.py file do something like:
+
+```
+from wagtail.api.v2.views import PagesAPIViewSet
+from wagtail.api.v2.router import WagtailAPIRouter
+from wagtail.core.models import Page, Site
+
+# Create the router. "wagtailapi" is the URL namespace
+api_router = WagtailAPIRouter("wagtailapi")
+
+class AllPagesAPIViewSet(PagesAPIViewSet):
+    def get_base_queryset(self):
+
+        # Get live pages
+        queryset = Page.objects.all().live()
+
+        # Filter by site
+        site = Site.find_for_request(self.request)
+        if site:
+            base_queryset = queryset
+            queryset = base_queryset.descendant_of(site.root_page, inclusive=True)
+	                
+	    # If internationalisation is enabled, include pages from other language trees
+            if getattr(settings, 'WAGTAIL_I18N_ENABLED', False):
+                for translation in site.root_page.get_translations():
+                    queryset |= base_queryset.descendant_of(translation, inclusive=True)
+
+        else:
+            # No sites configured
+            queryset = queryset.none()
+
+        return queryset
+
+
+api_router.register_endpoint("pages", AllPagesAPIViewSet)
+```
+
+Of course you can do whatever else tricks you want there to enable your API only for specific pages.
 
 Various Questions
 -----------------
