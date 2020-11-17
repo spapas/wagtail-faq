@@ -247,7 +247,7 @@ class AdminImageChooserEx(AdminImageChooser):
 
 ```
 
-This class expects to be called with a `min_width` argument; it will then pass it to the context of a templated named `wagtailimages/widgets/image_chooser_ex.html` renders. Notice the trickery with the `super(AdminChooser, self).render_html(...)` (somebody would expect either `super().render_html()` - py3 style or even `super(AdminImageChooser, self).render_html(...)` - py2 style); this line is correct.
+This class expects to be called with a `min_width` argument; it will then pass it to the context of a templated named `wagtailimages/widgets/image_chooser_ex.html` renders. Notice the trickery with the `super(AdminChooser, self).render_html(...)` (somebody would expect either `super().render_html()` - py3 style or even `super(AdminImageChooser, self).render_html(...)` - py2 style); this line is **correct**; we need to use our *grandparent's* `render_html`, not our parent's (which is the usual thing) .
 
 3. The `AdminImageChooserEx` class needs an `image_chooser_ex.html` template. So create a directory named `templates\wagtailimages\widgets` in your app and add the following to it
 
