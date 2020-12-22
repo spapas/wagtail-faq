@@ -184,7 +184,7 @@ Use this: https://github.com/thibaudcolas/wagtail_draftail_experiments/tree/mast
 
 Something like this should work:
 
-```
+```python
 from django.utils.html import escape
 from wagtail.core import hooks
 from wagtail.core.rich_text import LinkHandler
@@ -209,7 +209,7 @@ def register_external_link(features):
 ```
 
 ### How to show-hide icons in the Wagtail rich-text editor and change their ordering
-```
+```python
 WAGTAILADMIN_RICH_TEXT_EDITORS = {
     "default": {
         "WIDGET": "wagtail.admin.rich_text.DraftailRichTextArea",
@@ -240,7 +240,7 @@ Pages
 One of the most common questions for Wagtail :)
 Copying directly from https://stackoverflow.com/a/43041179/119071:
 
-```
+```python
 page = SomePageType(title="My new page", body="<p>Hello world</p>")  # adjust fields to match your page type
 parent_page.add_child(instance=page)
 ```
