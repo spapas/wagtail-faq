@@ -28,7 +28,7 @@ There are various ways to do that but the simplest one seems to be using the con
 
 You can create a template snippet like this one:
 
-```
+```html
 {% load wagtailcore_tags %}
 
 {% if page.get_ancestors|length > 1 %}
@@ -54,8 +54,7 @@ Improve Wagtail Behaviour
 
 Here's the relevant issue: https://github.com/wagtail/wagtail/issues/1602. Since this is very difficult to fix in Wagtail, just add the following middleware to your list of middleware classes to display a proper error message instead of the 500 server error:
 
-```
-
+```python
 class HandleProtectionErrorMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -84,7 +83,7 @@ class HandleProtectionErrorMiddleware:
 
 Try this code:
 
-```
+```python
 from django.utils.html import format_html
 from wagtail.core import hooks
 
@@ -102,9 +101,7 @@ function cleanForSlug(val, useURLify) {
 }
 
     </script>"""
-    
 ``` 
-
 
 
 Wagtail Admin customization
@@ -114,7 +111,7 @@ Wagtail Admin customization
 
 You can use `insert_global_admin_css`. For example, try something like this:
 
-```
+```python
 @hooks.register("insert_global_admin_css", order=100)
 def global_admin_css():
     return """
@@ -131,7 +128,7 @@ def global_admin_css():
 
 You can add a custom wagtail form that inherits from `WagtailAdminPageForm` and overrides its `clean()` method. Something like this:
 
-```
+```python
 from wagtail.admin.forms.pages import WagtailAdminPageForm
 
 class CustomPageForm(WagtailAdminPageForm):
@@ -147,7 +144,7 @@ class CustomPageForm(WagtailAdminPageForm):
 
 Then use `CustomPageForm` for your page's form using the `base_form_class` attribute, i.e:
 
-```
+```python
 class CustomPage(Page):
     base_form_class = IntPageForm
 ```
@@ -156,7 +153,7 @@ class CustomPage(Page):
 
 If your page has a `Parental` relation with a model and render the field through an `InlinePanel` (check this for more info https://docs.wagtail.io/en/v2.0/reference/pages/panels.html#inline-panels) then your form will render the inline panel as a formset. To validate a field in that formset you can use the following clean method in your custom form:
 
-```
+```python
     def clean(self):
         cleaned_data = super().clean()
 	# You can run checks for the main page here
@@ -188,7 +185,6 @@ Something like this should work:
 from django.utils.html import escape
 from wagtail.core import hooks
 from wagtail.core.rich_text import LinkHandler
-
 
 class NewWindowExternalLinkHandler(LinkHandler):
     # This specifies to do this override for external links only.
@@ -258,7 +254,7 @@ Use this: https://github.com/spapas/wagtail-multi-upload
 
 Sometimes the editors don't care (or don't even know) about image sizes, and they will upload an image with a 200px width as the central photo of a new article; they may even not care when they see the big pixelized artefacts this will generate! The canonical way to fix this is to add a `Form` for your `Page`. To do this, first create a form class with a clean method like this:
 
-```
+```python
 from wagtail.admin.forms import WagtailAdminPageForm
 
 class CustomPageForm(WagtailAdminPageForm):
@@ -285,7 +281,7 @@ Continuing from the previous FAQ, you can do some acrobatics to *filter* small i
 1. This works with Wagtail 2.11. I haven't tested it with other Wagtail versions
 2. Start by putting the following `AdminImageChooserEx` class somewhere:
 
-```
+```python
 from wagtail.images.widgets import AdminImageChooser
 
 class AdminImageChooserEx(AdminImageChooser):
@@ -327,7 +323,7 @@ It just overrides the `image_chooser.html` template to pass the min_width option
 
 4. Use a hook to filter the images of the chooser by their width:
 
-```
+```python
 from wagtail.core import hooks
 
 @hooks.register("construct_image_chooser_queryset")
@@ -341,7 +337,7 @@ def show_images_with_width(images, request):
 
 5. Add a panel that would *actually* set that width:
 
-```
+```python
 from wagtail.images.edit_handlers import ImageChooserPanel
 
 class ImageExChooserPanel(ImageChooserPanel):
@@ -356,7 +352,7 @@ The above only allows images with a width of more than 2000 pixel. You need to a
 
 6. Finally *use* that `ImageExChooserPanel`  in your page: 
 
-```
+```python
 Page.content_panels + [
 	# ...
         ImageExChooserPanel("image",),
@@ -392,7 +388,7 @@ First of all, by default Wagtail uses the `WAGTAILDOCS_SERVE_METHOD = serve_view
 
 Ok, now how to properly configure Wagtail for this. First of all, add the following settings to your settings (`MEDIA_*` should be there but anyway):
 
-```
+```python
 WAGTAILDOCS_SERVE_METHOD = "serve_view" # We talked about this
 SENDFILE_BACKEND = "sendfile.backends.nginx" # If you are using nginx; there is support for other web sevrers
 MEDIA_URL = "/media/"
@@ -403,7 +399,7 @@ SENDFILE_URL = "/media/documents/"
 
 The above tells Django that the docs should be server through nginx and where the documents will be. Finally, add the following two entries in your Nginx configuration:
 
-```
+```python
     location /media/documents/ {
         internal;
         alias /home/serafeim/hcgwagtail/hcgwagtail/media/documents/;
@@ -423,7 +419,7 @@ Sorting
 ### How can I add a default order for the pages displayed in a `PageChooserPanel`
 
 Use something like this:
-```
+```python
 from wagtail.core import hooks
 
 @hooks.register("construct_page_chooser_queryset")
@@ -447,7 +443,7 @@ By default search results *will* contain all pages even if the current user does
 
 Let's suppose you've got a Page queryset with all the results of a search. You can use the following snippet to remove pages that the current user doesn't have permission to view:
 
-```
+```python
 from wagtail.wagtailcore.models import PageViewRestriction
 def exclude_invisible_pages(request, pages):
     # Get list of pages that are restricted to this user
@@ -469,7 +465,7 @@ Wagtail API
 
 By default the Wagtail API will display only public pages. You can change it by overriding the `get_base_queryset` method of `PagesAPIViewSet`. So, in your api.py file do something like:
 
-```
+```python
 from wagtail.api.v2.views import PagesAPIViewSet
 from wagtail.api.v2.router import WagtailAPIRouter
 from wagtail.core.models import Page, Site
@@ -512,7 +508,7 @@ Various Questions
 
 ### How can I check if a user can publish pages?
 
-```
+```python
     from wagtail.core.models import UserPagePermissionsProxy
     
     if not UserPagePermissionsProxy(request.user).can_publish_pages():
