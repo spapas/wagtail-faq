@@ -3,6 +3,7 @@
 * [Wagtail Templates](#wagtail-templates)
 * [Improve Wagtail Begavior](#improve-wagtail-behavior)
 * [Wagtail Admin Customization](#wagtail-admin-customization)
+* [Pages](#pages)
 * [Images](#images)
 * [Documents](#documents)
 * [Rich Text Editor](#rich-text-editor)
@@ -230,6 +231,21 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
     }
 }
 ```
+
+Pages
+-----
+
+### How can I create a page programatically?
+
+One of the most common questions for Wagtail :)
+Copying directly from https://stackoverflow.com/a/43041179/119071:
+
+```
+page = SomePageType(title="My new page", body="<p>Hello world</p>")  # adjust fields to match your page type
+parent_page.add_child(instance=page)
+```
+
+
 
 Images
 ------
