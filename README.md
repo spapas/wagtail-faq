@@ -251,6 +251,8 @@ There's a better way! You can use something like:
 page.get_descendants().filter(depth__lte=page.depth+2)
 ```
 
+The children of the `page` have a `depth==page.depth+1` and the grandchildren have a `depth==page.depth+2`.
+
 Or change 2 to n to get the descendants of the page that are up to n levels below the page.
 
 
