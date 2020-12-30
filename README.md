@@ -255,6 +255,14 @@ The children of the `page` have a `depth==page.depth+1` and the grandchildren ha
 
 Or change 2 to n to get the descendants of the page that are up to n levels below the page.
 
+### How are the wagtail Pages stored in the database?
+
+Wagtail uses a tree-like structure to store its pages. The library doing the heavy work is called django-treebeard (https://github.com/django-treebeard/django-treebeard/). It uses an intuitive approach to store the tree: Each `Page` has a path field that denotes its position in the tree and is actually a varchar. Each child in each level in the tree gets a value from `0001` to `ZZZZ` (i.e after 9 the letters A-Z are counted) and for each level a new quadruple is added. So root trees will have a path like `0001` or `BCD3`. First level pages will have paths like 
+`00012233`, `00010001` or `BCD30002` (notice that the first two are children of `0001` root node while the last one is child of `BCD3` root node). 
+
+One implication of the above is that there can be a finite number of children for each node, equal to 10 numbers + 26 letters = 36 combinations ^ 4 (places) = 1679616 - 1 (because the first value is `0001` not `0000`) 1679615 children. Another implication is that because the `path` is a `varchar(255)` there can be up to 255/4 = 63 levels for each tree!
+
+Now, for each of your models that overrides `Page` to create a specific page type (i.e `HomePage`, `StandardPage`) there will be two rows in the database in two different tables. One in the `wagtail_page` models that will have the tree related staff I mentioned above and another in the corresponding table for your page type (i.e `home_homepage`) that will have the custom fields of your page type and a foreign key (which also is used as a primary key) to the corresponding page.
 
 Images
 ------
