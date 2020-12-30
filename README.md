@@ -241,6 +241,17 @@ page = SomePageType(title="My new page", body="<p>Hello world</p>")  # adjust fi
 parent_page.add_child(instance=page)
 ```
 
+### How can I get the children and grand-children of a page without doing lots of queries?
+
+The naive approach is to get the children of the page using `page.get_children()` and then get each child's children. This leads to N+1 queries which is a no-no. 
+
+There's a better way! You can use something like:
+
+```python
+page.get_descendants().filter(depth__lte=page.depth+2)
+```
+
+Or change 2 to n to get the descendants of the page that are up to n levels below the page.
 
 
 Images
