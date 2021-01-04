@@ -1,7 +1,7 @@
 # wagtail-faq
 
 * [Wagtail Templates](#wagtail-templates)
-* [Improve Wagtail Begavior](#improve-wagtail-behaviour)
+* [Improve Wagtail Behavior](#improve-wagtail-behaviour)
 * [Wagtail Admin Customization](#wagtail-admin-customization)
 * [Pages](#pages)
 * [Images](#images)
