@@ -103,6 +103,17 @@ function cleanForSlug(val, useURLify) {
     </script>"""
 ``` 
 
+*Since Wagtail 2.12* you can also use this must simpler code for your hook:
+
+```
+@hooks.register('insert_editor_js')
+def editor_js():
+return  r"""<script>
+window.unicodeSlugsEnabled = false
+    </script>"""
+```
+
+
 
 Wagtail Admin customization
 ---------------------------
