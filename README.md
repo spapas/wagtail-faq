@@ -561,3 +561,6 @@ Just use Django's syndication framework: https://docs.djangoproject.com/en/3.0/r
 
 Here you go: https://docs.wagtail.io/en/v2.8/reference/contrib/sitemaps.html
 
+### How can I display HTML to my wagtail forms? 
+
+Use the `WAGTAILFORMS_HELP_TEXT_ALLOW_HTML` setting - see https://docs.wagtail.io/en/stable/releases/2.9.3.html
