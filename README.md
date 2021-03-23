@@ -10,6 +10,7 @@
 * [Sorting](#sorting)
 * [Searching](#searching)
 * [Wagtail API](#wagtail-api)
+* [ModelAdmin](#modeladmin)
 * [Various Questions](#various-questions)
 
 
@@ -533,6 +534,33 @@ api_router.register_endpoint("pages", AllPagesAPIViewSet)
 ```
 
 Of course you can do whatever else tricks you want there to enable your API only for specific pages.
+
+
+
+ModelAdmin
+----------
+
+### Can I display an image to one of the columns of my ModelAdmin listing?
+
+Yes! It's actually very easy. Add a custom function to your model that returns a "safe" text containing an `<img>` element with the image you want to display as src. You should use the rendition API to return a proper thumbnail fit for your column. Something like this method for example: 
+
+```
+from django.utils.html import format_html
+
+
+class ModelWithImage(models.Model):
+    image = models.ForeignKey(CustomImage, on_delete=models.CASCADE)
+    
+    def show_image(self):
+        return format_html(
+            "<img style='max-width: 200px;' src='{0}'>".format(
+                self.image.get_rendition("width-200|jpegquality-60").url
+            )
+        )
+```
+
+Now you can add this show_image method to the `list_display` attribute of your `ModelAdmin` and profit!
+
 
 Various Questions
 -----------------
