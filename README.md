@@ -220,7 +220,7 @@ def register_external_link(features):
 
 This is useful for PDF files because chrome opens them in the same window and users are complaining that are navigated away from the site! Just use the following snippet:
 
-```
+```python
 from wagtail.documents.rich_text import DocumentLinkHandler
 from django.core.exceptions import ObjectDoesNotExist
 
