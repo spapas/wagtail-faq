@@ -179,7 +179,7 @@ If your page has a `Parental` relation with a model and render the field through
                     )
 
         return cleaned_data
-```	
+```
 
 Rich Text Editor
 ----------------
@@ -216,6 +216,34 @@ def register_external_link(features):
     features.register_link_type(NewWindowExternalLinkHandler)
 ```
 
+### How can I open document links to an external window?
+
+This is useful for PDF files because chrome opens them in the same window and users are complaining that are navigated away from the site! Just use the following snippet:
+
+```
+from wagtail.documents.rich_text import DocumentLinkHandler
+from django.core.exceptions import ObjectDoesNotExist
+
+
+class CustomDocumentLinkHandler(DocumentLinkHandler):
+    @classmethod
+    def expand_db_attributes(cls, attrs):
+        try:
+            doc = cls.get_instance(attrs)
+            return '<a target="_blank" href="%s">' % escape(doc.url)
+        except (ObjectDoesNotExist, KeyError):
+            return "<a>"
+
+
+@hooks.register("register_rich_text_features")
+def register_link_handler(features):
+
+    features.register_link_type(CustomDocumentLinkHandler)
+```
+
+**Important:** Please notice that if the application which registers this snippet is *before* the `wagtail.documents` application in your `settings.INSTALLED_APPS` the `wagtail.documents` will override your handler with the default one. So you need to put your app *below* `wagtail.documents` so your own handler is used instead.
+
+
 ### How to show-hide icons in the Wagtail rich-text editor and change their ordering
 ```python
 WAGTAILADMIN_RICH_TEXT_EDITORS = {
@@ -239,6 +267,8 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
     }
 }
 ```
+
+
 
 Pages
 -----
