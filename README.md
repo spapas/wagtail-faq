@@ -475,6 +475,35 @@ The above tells Django that the docs should be server through nginx and where th
 
 The first one tells Nginx that the files in `/media/documents` will be served through the sendfile mechanism I described before; the second one is the common media serving directive. Notice that the first one will match first so documents won't be served directly; please make sure that this really is the case by trying to get an uploaded document directly by its URL (i.e. `/media/documents/...`).
 
+### Can I search my documents with their id?
+
+Each wagtail document has a unique id which is visible in its public link together with the filename, i.e each document will be served through a link like the following: 
+https://example.com/documents/<document_id>/<filename>. Sometimes your editors may need to search for a document using that particular id (because they see it in the page but they haven't added a proper title so as the document to be indexed). To resolve that you can add the `id` field of the document to the search index.
+
+If you are using a custom document model then adding the `id` field to the search index should be as trivial as something like:
+
+```python
+from wagtail.documents.models import AbstractDocument
+from wagtail.search.index import SearchField	
+	
+search_fields = AbstractDocument.search_fields + [
+	index.SearchField("id"),
+]
+```
+
+However if you are *not* using a custom document model then you can resort to some monkey patching: Add the following snippet to the models.py of an application that is loaded *before* the `wagtail.documents` application (as determined by the order of the apps in the `INSTALLED_APPS` setting):
+	
+```python	
+from wagtail.documents.models import AbstractDocument
+from wagtail.search.index import SearchField
+
+AbstractDocument.search_fields += [SearchField("id")]
+```
+	
+The above will override the `search_fields` of the  `AbstractDocument` model that `Document` inherits from thus it will use the `id` in the search fields.
+	
+Don't forget to re-index your models by running `python manange.py update_index`.
+	
 
 Sorting
 -------
