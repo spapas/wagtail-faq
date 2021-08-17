@@ -504,6 +504,15 @@ The above will override the `search_fields` of the  `AbstractDocument` model tha
 	
 Don't forget to re-index your models by running `python manange.py update_index`.
 	
+### Can I search my pages  with their id?
+
+Yes, just do the same as for documents:
+	
+```python
+from wagtail.core.models import Page
+
+Page.search_fields += [SearchField("id")]	
+```	
 
 Sorting
 -------
