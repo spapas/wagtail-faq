@@ -306,6 +306,13 @@ One implication of this is that there can be a finite number of children for eac
 
 Now, for each of your models that overrides `Page` to create a specific page type (i.e `HomePage`, `StandardPage`) there will be two rows in the database in two different tables. One in the `wagtail_page` models that will have the tree related staff I mentioned above and another in the corresponding table for your page type (i.e `home_homepage`) that will have the custom fields of your page type and a foreign key (which also is used as a primary key) to the corresponding page. This is why you need to use `specific()` (https://docs.wagtail.io/en/v2.11.3/reference/pages/queryset_reference.html#wagtail.core.query.PageQuerySet.specific) when querying `Page` to retrieve the custom fields for each page of your queryset result.
 
+### Can I search my pages with their id?
+Yes, just do the same as for documents:
+
+from wagtail.core.models import Page
+
+Page.search_fields += [SearchField("id")]
+
 Images
 ------
 
@@ -504,15 +511,6 @@ The above will override the `search_fields` of the  `AbstractDocument` model tha
 	
 Don't forget to re-index your models by running `python manange.py update_index`.
 	
-### Can I search my pages  with their id?
-
-Yes, just do the same as for documents:
-	
-```python
-from wagtail.core.models import Page
-
-Page.search_fields += [SearchField("id")]	
-```	
 
 Sorting
 -------
