@@ -309,9 +309,11 @@ Now, for each of your models that overrides `Page` to create a specific page typ
 ### Can I search my pages with their id?
 Yes, just do the same as for documents:
 
+```python
 from wagtail.core.models import Page
 
 Page.search_fields += [SearchField("id")]
+```
 
 Images
 ------
