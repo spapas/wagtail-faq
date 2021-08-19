@@ -664,7 +664,7 @@ Use the `WAGTAILFORMS_HELP_TEXT_ALLOW_HTML` setting - see https://docs.wagtail.i
 ### What should I do when I start a new project?
 
 * Add a custom abstract `BasePage` model that would inherit from `wagtail.Page` and your Pages will inherit from it. This way you can put there any stuff you want to have to all your `Page` instances (for example search by id)
-* Use a custom Documents model: https://docs.wagtail.io/en/stable/advanced_topics/documents/custom_document_model.html. Just do it. Thank me later.
-* Use a custom Image model: https://docs.wagtail.io/en/stable/advanced_topics/images/custom_image_model.html. You may think you don't need to. Trust me, you will and then it will be late.
-* Use a custom User model: https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#substituting-a-custom-user-model. Once again, I know you think you can avoid it. However it's just 5 minutes to set it up. If you need it you'll be glad you invested those 5 minutes.
+* Use a custom `Documents` model: https://docs.wagtail.io/en/stable/advanced_topics/documents/custom_document_model.html. Just do it. Thank me later.
+* Use a custom `Image` model: https://docs.wagtail.io/en/stable/advanced_topics/images/custom_image_model.html. You may think you don't need to. Trust me, you will and then it will be late.
+* Use a custom `User` model: https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#substituting-a-custom-user-model. Once again, I know you think you can avoid it. However it's just 5 minutes to set it up. If you need it you'll be glad you invested those 5 minutes.
 	
