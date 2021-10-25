@@ -660,7 +660,7 @@ class FormField(AbstractFormField):
 
 This is more or less the same as the `save()` that the 	`AbstractFormField` but it uses the unidecode lib to transliterate the unicode chars to their ASCII equivalens (i.e `Τηλέφωνο` will be `telephono`. In the above snippet please be extra careful about the last line `super(AbstractFormField, self).save(*args, **kwargs)` because it will call its grand-parent's `save()` instead of its parent's `save()`.
 	
-So in the above example the form will be rendered like `<input name='telephono' id='id_telephono'` and the `form_submission.get_data()` dict will have a `telephono` key!
+So in the above example the form field will be rendered like `<input name='telephono' id='id_telephono'` and the `form_submission.get_data()` dict will have a `telephono` key!
 
 Various Questions
 -----------------
