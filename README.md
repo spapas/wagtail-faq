@@ -637,6 +637,8 @@ Wagtail Forms
 	
 Wagtail will try to convert your labels to an ASCII form to be used as identifiers for your form fields. Currently it just converts your non-english characters to their unicode normalized representation (i.e `Τηλέφωνο` will be converted to `u03a4u03b7u03bbu03b5u03c6u03c9u03bdu03bf`). 
 	
+So, if you have a form field that gets a label of `'Τηλέφωνο'` it will rendered in the html form like: `<input name='u03a4u03b7u03bbu03b5u03c6u03c9u03bdu03b' id='id_u03a4u03b7u03bbu03b5u03c6u03c9u03bdu03bf'>` and the `form_submission.get_data()` dictionary will have a `u03a4u03b7u03bbu03b5u03c6u03c9u03bdu03b` key!
+	
 ### I need to use proper names for my fields instead of that thingie, is it possible?	
 	
 Yes, you need to override the `save()` method of you FormField like this:
@@ -656,9 +658,9 @@ class FormField(AbstractFormField):
         super(AbstractFormField, self).save(*args, **kwargs)
 ```	
 
-This is more or less the same as the `save()` that the 	`AbstractFormField` but it uses the unidecode lib to transliterate the unicode chars to their ASCII equivalens (i.e `Τηλέφωνο` will be `tilephono`. In the above snippet please be extra careful about the last line `super(AbstractFormField, self).save(*args, **kwargs)` because it will call its grand-parent's `save()` instead of its parent's `save()`.
+This is more or less the same as the `save()` that the 	`AbstractFormField` but it uses the unidecode lib to transliterate the unicode chars to their ASCII equivalens (i.e `Τηλέφωνο` will be `telephono`. In the above snippet please be extra careful about the last line `super(AbstractFormField, self).save(*args, **kwargs)` because it will call its grand-parent's `save()` instead of its parent's `save()`.
 	
-	
+So in the above example the form will be rendered like `<input name='telephono' id='id_telephono'` and the `form_submission.get_data()` dict will have a `telephono` key!
 
 Various Questions
 -----------------
