@@ -11,6 +11,7 @@
 * [Searching](#searching)
 * [Wagtail API](#wagtail-api)
 * [ModelAdmin](#modeladmin)
+* [Wagtail Forms](#wagtail-forms)
 * [Various Questions](#various-questions)
 
 
@@ -629,6 +630,35 @@ class ModelWithImage(models.Model):
 
 Now you can add this show_image method to the `list_display` attribute of your `ModelAdmin` and profit!
 
+Wagtail Forms
+-------------
+	
+### What's that unicode related mess I see in my field names when I use non-english characters as labels in my Wagtail forms?
+	
+Wagtail will try to convert your labels to an ASCII form to be used as identifiers for your form fields. Currently it just converts your non-english characters to their unicode normalized representation (i.e `Τηλέφωνο` will be converted to `u03a4u03b7u03bbu03b5u03c6u03c9u03bdu03bf`). 
+	
+### I need to use proper names for my fields instead of that thingie, is it possible?	
+	
+Yes, you need to override the `save()` method of you FormField like this:
+	
+```
+class FormField(AbstractFormField):
+    page = ParentalKey("FormPage", related_name="form_fields")
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        if is_new:
+            from unidecode import unidecode
+            from django.utils.text import slugify
+
+            self.clean_name = str(slugify(str(unidecode(self.label))))
+
+        super(AbstractFormField, self).save(*args, **kwargs)
+```	
+
+This is more or less the same as the `save()` that the 	`AbstractFormField` but it uses the unidecode lib to transliterate the unicode chars to their ASCII equivalens (i.e `Τηλέφωνο` will be `tilephono`. In the above snippet please be extra careful about the last line `super(AbstractFormField, self).save(*args, **kwargs)` because it will call its grand-parent's `save()` instead of its parent's `save()`.
+	
+	
 
 Various Questions
 -----------------
