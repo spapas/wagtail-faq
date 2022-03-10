@@ -629,6 +629,45 @@ class ModelWithImage(models.Model):
 ```
 
 Now you can add this show_image method to the `list_display` attribute of your `ModelAdmin` and profit!
+	
+### How can I add a custom clean method to my ModelAdmin?
+	
+The simplest way is to extend your model and add a clean() model to it. For example:
+	
+```
+class ModelAdminModel(models.Model):
+    def clean(self):
+        if self.image.width < 1920 or self.image.height < 1080:
+            raise forms.ValidationError("The image must be at least 1920x1080 pixels in size.")
+```
+
+This will run the clean and raise the ValidationError whenever you save the model. The error will be displayed at the top of the wagtail admin. 
+	
+If you want more fine grained-control you can add a custom clean() method to the WagtailAdminPageForm  of your model. You can override the form of your ModelAdmin in a similar matter as your wagtail Pages: https://docs.wagtail.org/en/stable/advanced_topics/customisation/page_editing_interface.html#custom-edit-handler-forms
+
+So, create a custom `WagtailAdminPageForm`
+	
+```
+class ModelAdminModelForm(WagtailAdminPageForm):
+    def clean(self):
+        cleaned_data = super().clean()
+        image = cleaned_data.get("image")
+        if image and image.width < 1920 or image.height < 1080:
+            self.add_error("image", "The image must be at least 1920x1080px")
+
+        return cleaned_data
+```	
+
+And then set the `base_form_class` of your mode:
+
+```
+class ModelAdminModel(models.Model):
+	base_form_class = ModelAdminModelForm
+```	
+
+Using `self.add_error` will display the error to the particular field that has the error.
+	
+	
 
 Wagtail Forms
 -------------
