@@ -732,6 +732,11 @@ Here you go: https://docs.wagtail.io/en/v2.8/reference/contrib/sitemaps.html
 
 Use the `WAGTAILFORMS_HELP_TEXT_ALLOW_HTML` setting - see https://docs.wagtail.io/en/stable/releases/2.9.3.html
 
+### How can I test my wagtail site?
+								     
+This is a rather complex question. You can start by traditional django testing (https://docs.djangoproject.com/en/4.0/topics/testing/) and then check out some wagtail specific resources (https://docs.wagtail.org/en/stable/advanced_topics/testing.html and https://github.com/cfpb/development/blob/main/guides/unittesting-django-wagtail.md).
+								     
+								     
 ### What should I do when I start a new project?
 
 * Add a custom abstract `BasePage` model that would inherit from `wagtail.Page` and your Pages will inherit from it. This way you can put there any stuff you want to have to all your `Page` instances (for example search by id)
