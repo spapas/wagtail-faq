@@ -182,6 +182,55 @@ If your page has a `Parental` relation with a model and render the field through
         return cleaned_data
 ```
 
+### How can I hide the "reset passwort" link from the login form?
+
+Add this to your settings:
+
+```
+WAGTAIL_PASSWORD_RESET_ENABLED = False
+```
+
+### How can I disable the remember me functionality from the login form?
+
+You should use a custom fields block for yout admin (https://docs.wagtail.org/en/latest/advanced_topics/customisation/admin_templates.html#fields) but *do not* use `{{ block.super }}` as described there. Instead override the form completely. Here's my ``appname/templates/wagtailadmin/login.html`` (please notice that `appname` *must be* before `wagtail.admin`  in your settings):
+
+
+
+```
+{% extends "wagtailadmin/login.html" %}
+
+{% block branding_login %}Login to admin{% endblock %}
+
+{% block above_login %}
+<div class="messages">
+    <ul>
+        <li class='error p-2'>
+             A custom message            
+        </li>
+    </ul>
+</div>    
+{% endblock %}
+
+{% block fields %}
+    <li class="full">
+        <div class="field iconfield">
+            {{ form.username.label_tag }}
+            <div class="input icon-user">
+                {{ form.username }}
+            </div>
+        </div>
+    </li>
+    <li class="full">
+        <div class="field iconfield">
+            {{ form.password.label_tag }}
+            <div class="input icon-password">
+                {{ form.password }}
+            </div>
+        </div>
+    </li>
+{% endblock %}
+```
+
 Rich Text Editor
 ----------------
 
