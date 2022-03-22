@@ -781,8 +781,52 @@ Here you go: https://docs.wagtail.io/en/v2.8/reference/contrib/sitemaps.html
 
 Use the `WAGTAILFORMS_HELP_TEXT_ALLOW_HTML` setting - see https://docs.wagtail.io/en/stable/releases/2.9.3.html
 
-### How can I test my wagtail site?
+### Is there a way to run some custom check for my editors when visiting the Wagtail admin?
+
+Yes, you can use the `decorate_urlpatterns` wagtail function to add some custom checks for all the wagtail admin views. The `decorate_urlpatters` expects a list of urls and a function that would return a decorated view. Here's an example of that function that I use in one of my sites for requiring my editors to have a specific flag in their session:
+
+```
+	
+def require_otp(view_func):
+    def decorated_view(request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return view_func(request, *args, **kwargs)       
+        if (
+            request.path not in ["/admin/login/", "/admin/logout/"]
+            and request.session.get("totp_ok") != True
+        ):
+            from django.core.exceptions import PermissionDenied
+            from wagtail.admin import messages
+
+            messages.error(request, "TOTP is not ok")
+            return HttpResponseRedirect("/")
+        return view_func(request, *args, **kwargs)
+    return decorated_view
+	
+```	
+	
+Notice I've got some checks to not use the check for /admin/{login, logout}.
 								     
+Now, in your urls.py you'll do the following:
+	
+```
+    from wagtail.admin import urls as wagtailadmin_urls
+    from django.urls import re_path
+	
+    wagtail_urlpatterns = decorate_urlpatterns(wagtailadmin_urls.urlpatterns, require_otp)
+
+    urlpatterns = [	
+	re_path(r"adm1n/", include(wagtail_urlpatterns)),
+	# other urls
+    ]
+```
+
+Please notice that the above method is the way Wagtail decorates its own views. Another possible solution is to use a custom middleware that would check if the request.path starts with `/admin` and do the custom check.
+
+
+### How can I test my wagtail site?
+
 This is a rather complex question. You can start by traditional django testing (https://docs.djangoproject.com/en/4.0/topics/testing/) and then check out some wagtail specific resources (https://docs.wagtail.org/en/stable/advanced_topics/testing.html and https://github.com/cfpb/development/blob/main/guides/unittesting-django-wagtail.md).
 								     
 								     
