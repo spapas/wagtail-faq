@@ -824,6 +824,29 @@ Now, in your urls.py you'll do the following:
 
 Please notice that the above method is the way Wagtail decorates its own views. Another possible solution is to use a custom middleware that would check if the request.path starts with `/admin` and do the custom check.
 
+### Is it possible to manage my tags from Wagtail?
+
+Yes, you can use a ModelAdmin for that, something like this:
+
+from wagtail.contrib.modeladmin.options import ModelAdmin, modeladmin_register
+from taggit.models import Tag
+
+class TagsModelAdmin(ModelAdmin):
+    Tag.panels = [FieldPanel("name")]  # only show the name field
+    model = Tag
+    menu_label = "Tags"
+    menu_icon = "tag"  # change as required
+    menu_order = 200  # will put in 3rd place (000 being 1st, 100 2nd)
+    list_display = ["id", "name", "slug"]
+    search_fields = (
+        "name",
+        "slug",
+    )
+
+modeladmin_register(TagsModelAdmin)
+
+
+
 
 ### How can I test my wagtail site?
 
