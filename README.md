@@ -828,6 +828,8 @@ Please notice that the above method is the way Wagtail decorates its own views. 
 
 Yes, you can use a ModelAdmin for that, something like this:
 
+```
+	
 from wagtail.contrib.modeladmin.options import ModelAdmin, modeladmin_register
 from taggit.models import Tag
 
@@ -845,7 +847,7 @@ class TagsModelAdmin(ModelAdmin):
 
 modeladmin_register(TagsModelAdmin)
 
-
+```
 
 
 ### How can I test my wagtail site?
