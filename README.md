@@ -757,11 +757,11 @@ Various Questions
 ### How can I check if a user can publish pages?
 
 ```python
-    from wagtail.core.models import UserPagePermissionsProxy
+from wagtail.core.models import UserPagePermissionsProxy
     
-    if not UserPagePermissionsProxy(request.user).can_publish_pages():
-        messages.add_message(request, messages.ERROR, "No access!")
-        return HttpResponseRedirect(reverse("wagtailadmin_home"))
+if not UserPagePermissionsProxy(request.user).can_publish_pages():
+    messages.add_message(request, messages.ERROR, "No access!")
+    return HttpResponseRedirect(reverse("wagtailadmin_home"))
 ```        
 
 
@@ -785,7 +785,7 @@ Use the `WAGTAILFORMS_HELP_TEXT_ALLOW_HTML` setting - see https://docs.wagtail.i
 
 Yes, you can use the `decorate_urlpatterns` wagtail function to add some custom checks for all the wagtail admin views. The `decorate_urlpatters` expects a list of urls and a function that would return a decorated view. Here's an example of that function that I use in one of my sites for requiring my editors to have a specific flag in their session:
 
-```
+```python
 	
 def require_otp(view_func):
     def decorated_view(request, *args, **kwargs):
@@ -828,7 +828,7 @@ Please notice that the above method is the way Wagtail decorates its own views. 
 
 Yes, you can use a ModelAdmin for that, something like this:
 
-```
+```python
 	
 from wagtail.contrib.modeladmin.options import ModelAdmin, modeladmin_register
 from taggit.models import Tag
