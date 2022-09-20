@@ -653,6 +653,19 @@ api_router.register_endpoint("pages", AllPagesAPIViewSet)
 
 Of course you can do whatever else tricks you want there to enable your API only for specific pages.
 
+### How I can get JSON Render without typing `?format=json`?
+
+By default Wagtail returns HTML Rendered Response. To get JSON render add this inside your `api.py`
+
+```
+class ProdPagesAPIViewSet(PagesAPIViewSet):
+    renderer_classes = [JSONRenderer]
+    name = "stories"
+    model = AddStory #The Page Model You want to render
+api_router.register_endpoint('pages', ProdPagesAPIViewSet)
+```
+
+The 'pages' can be changed to anything and it will effect in url for ex: if I change it to `prod` the URL patern will be `api/v2/prod`
 
 
 ModelAdmin
