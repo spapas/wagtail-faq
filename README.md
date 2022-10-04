@@ -365,6 +365,10 @@ from wagtail.core.models import Page
 Page.search_fields += [SearchField("id")]
 ```
 
+### Can I give my Page types a description?
+
+Yes, you can add a helpful description text, similar to a help_text model attribute. By adding page_description to your Page model you’ll be adding a short description that can be seen when you create a new page, edit an existing page or when you’re prompted to select a child page type. See https://docs.wagtail.org/en/stable/topics/pages.html#page-descriptions
+
 Images
 ------
 
