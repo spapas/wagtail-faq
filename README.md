@@ -244,6 +244,10 @@ Please take a look at these invaluable blog posts:
 * https://enzedonline.com/en/tech-blog/wagtail-extending-the-draftail-editor-part-3-dynamic-text/
 * https://enzedonline.com/en/tech-blog/wagtail-extending-the-draftail-editor-part-4-custom-lists/
 
+### How can I add underline support?
+
+This is solved in this article: https://enzedonline.com/en/tech-blog/wagtail-extending-the-draftail-editor-part-1-inline-styles/
+
 ### How can I add anchor links? 
 
 Use this: https://github.com/thibaudcolas/wagtail_draftail_experiments/tree/master/wagtail_draftail_anchors
@@ -328,7 +332,137 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
 }
 ```
 
+### I'd like to allow my editors to add verbatim HTML code on the rich-text
 
+This isn't a good idea. You should be able to use anything you want using Streamfields. Also it's easy to add a RawHTML Streamfield block that would render html.
+
+### Ok but I do have an *absolute need* to allow my editors to add verbatim HTML code on the rich-text
+
+Well, ok since you need it so much here's the way to do it (courtesy of https://enzedonline.com/en/tech-blog/wagtail-extending-the-draftail-editor-part-3-dynamic-text/ that I've already mentioned above):
+
+1. Add this on your wagtail-hooks.py:
+
+```python
+from wagtail import hooks
+
+
+def register_inline_styling(
+    features,
+    feature_name,
+    description,
+    type_,
+    tag="span",
+    format=None,
+    editor_style=None,
+    label=None,
+    icon=None,
+):
+    control = {"type": type_, "description": description}
+    if label:
+        control["label"] = label
+    elif icon:
+        control["icon"] = icon
+    else:
+        control["label"] = description
+    if editor_style:
+        control["style"] = editor_style
+
+    if not format:
+        style_map = {"element": tag}
+        markup_map = tag
+    else:
+        style_map = f"{tag} {format}"
+        markup_map = f"{tag}[{format}]"
+
+    features.register_editor_plugin("draftail", feature_name, InlineStyleFeature(control))
+    db_conversion = {
+        "from_database_format": {markup_map: InlineStyleElementHandler(type_)},
+        "to_database_format": {"style_map": {type_: style_map}},
+    }
+    features.register_converter_rule("contentstate", feature_name, db_conversion)
+
+@hooks.register("register_rich_text_features")
+def register_html_styling(features):
+    register_inline_styling(
+        features=features,
+        feature_name="html",
+        description="Verbatim html",
+        type_="HTML",
+        format='class="verbatim-html"',
+        label="ℋ",
+        editor_style={
+            "background-color": "orange",
+            "color": "#222",
+            "font-family": "monospace",
+            "font-size": "0.9rem",
+            "font-weight": "bold",
+        },
+    )
+```
+
+The above will add allow you to add an HTML type with an ℋ button on your toolbar. When you select some text and press the ℋ button it will change it to monospace and add an orange background. What you selected will be rendered inside a `<span class='verbatim-html' />` element. 
+
+2. Add this to your global styles to hide whatever's inside the verbatim-html class: 
+
+```css
+.verbatim-html {
+    display: none;
+}
+```
+
+3. Add this to your global js:
+
+```javascript
+$(function() {
+    verbatimHtmls = [...document.getElementsByClassName('verbatim-html')];
+    verbatimHtmls.forEach(h => {
+        window.hh = h.innerText;
+
+        $(h).html(hh)
+        h.className = 'verbatim-html-rendered'
+    });
+})
+```
+
+to change the contents of `verbatim-html` from text to html and change the class to `verbatim-html-rendered`. 
+
+**WARNING**: I suggest you do some sanitization to the HTML elements you'll allow there unless you really trust your editors. You've been warned!
+
+4. Add the 'html' type to your `WAGTAILADMIN_RICH_TEXT_EDITORS` features (see previous question) like:
+
+```python
+WAGTAILADMIN_RICH_TEXT_EDITORS = {
+    "default": {
+        "WIDGET": "wagtail.admin.rich_text.DraftailRichTextArea",
+        "OPTIONS": {
+            "features": [
+                "bold",
+                "italic",
+                "superscript",
+                "subscript",
+                "strikethrough",
+                "underline",
+                "h2",
+                "h3",
+                "h4",
+                "h5",
+                "hr",
+                "ol",
+                "ul",
+                "link",
+                "document-link",
+                "image",
+                # "anchor",
+                "embed",
+                "blockquote",
+                "html",
+            ]
+        },
+    }
+}
+```
+
+5. PROFIT!
 
 Pages
 -----
