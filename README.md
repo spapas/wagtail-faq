@@ -234,6 +234,16 @@ You should use a custom fields block for yout admin (https://docs.wagtail.org/en
 Rich Text Editor
 ----------------
 
+### The Wagtail Richeditor configuration seems very complex. Where can I get more help ?
+
+Please take a look at these invaluable blog posts:
+
+* https://enzedonline.com/en/tech-blog/configuring-rich-text-blocks-for-your-wagtail-site/
+* https://enzedonline.com/en/tech-blog/wagtail-extending-the-draftail-editor-part-1-inline-styles/
+* https://enzedonline.com/en/tech-blog/wagtail-extending-the-draftail-editor-part-2-block-styles/
+* https://enzedonline.com/en/tech-blog/wagtail-extending-the-draftail-editor-part-3-dynamic-text/
+* https://enzedonline.com/en/tech-blog/wagtail-extending-the-draftail-editor-part-4-custom-lists/
+
 ### How can I add anchor links? 
 
 Use this: https://github.com/thibaudcolas/wagtail_draftail_experiments/tree/master/wagtail_draftail_anchors
