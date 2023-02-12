@@ -367,7 +367,7 @@ class HTMLBlockElementHandler(BlockElementHandler):
                 "pre", "span", "div",
                 "br", "hr",
             ],
-            attributes=["href", "title", "alt", "src", "style", "class", "id", "target", "rel"],
+            attributes=["href", "title", "alt", "src", "class", "id", "target", "rel"],
         )
 
 
