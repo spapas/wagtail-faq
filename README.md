@@ -422,6 +422,7 @@ def global_admin_css():
             }
         </style>
         """
+```
 
 4. Add this to your global js to change the contents of `verbatim-html` from text to HTML and change the element class to `verbatim-html-rendered`:
 
