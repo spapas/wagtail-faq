@@ -338,71 +338,70 @@ This isn't a good idea. You should be able to use anything you want using Stream
 
 ### Ok but I do have an *absolute need* to allow my editors to add verbatim HTML code on the rich-text
 
-Well, ok since you need it so much here's the way to do it (courtesy of https://enzedonline.com/en/tech-blog/wagtail-extending-the-draftail-editor-part-3-dynamic-text/ that I've already mentioned above):
+Well, ok since you need it so much here's the way to do it (courtesy of https://enzedonline.com/en/tech-blog/wagtail-extending-the-draftail-editor-part-2-block-styles/ and https://enzedonline.com/en/tech-blog/wagtail-extending-the-draftail-editor-part-3-dynamic-text/ that I've already mentioned above):
+
+0. Install bleach: `pip install bleach` to be able to sanitize the HTML.
 
 1. Add this on your wagtail-hooks.py:
 
 ```python
-from wagtail import hooks
 
+import wagtail.admin.rich_text.editors.draftail.features as draftail_features
+from wagtail.admin.rich_text.converters.html_to_contentstate import BlockElementHandler
+from wagtail.admin.rich_text.editors.draftail.features import InlineStyleFeature
+import bleach
 
-def register_inline_styling(
-    features,
-    feature_name,
-    description,
-    type_,
-    tag="span",
-    format=None,
-    editor_style=None,
-    label=None,
-    icon=None,
-):
-    control = {"type": type_, "description": description}
-    if label:
-        control["label"] = label
-    elif icon:
-        control["icon"] = icon
-    else:
-        control["label"] = description
-    if editor_style:
-        control["style"] = editor_style
+class HTMLBlockElementHandler(BlockElementHandler):
+    def handle_endtag(self, name, state, contentState):
+        assert not state.current_inline_styles, "End of block reached without closing inline style elements"
+        assert not state.current_entity_ranges, "End of block reached without closing entity elements"
+        html = state.current_block.text
+        state.current_block.text = bleach.clean(
+            html,
+            tags=[
+                "table", "tr", "td",
+                "tbody", "thead", "th",
+                "a", "b", "code", "em", "i",
+                "li", "ol", "strong", "ul",
+                "h1", "h2", "h3", "h4", "h5", "h6", "p",
+                "pre", "span", "div",
+                "br", "hr",
+            ],
+            attributes=["href", "title", "alt", "src", "style", "class", "id", "target", "rel"],
+        )
 
-    if not format:
-        style_map = {"element": tag}
-        markup_map = tag
-    else:
-        style_map = f"{tag} {format}"
-        markup_map = f"{tag}[{format}]"
-
-    features.register_editor_plugin("draftail", feature_name, InlineStyleFeature(control))
-    db_conversion = {
-        "from_database_format": {markup_map: InlineStyleElementHandler(type_)},
-        "to_database_format": {"style_map": {type_: style_map}},
-    }
-    features.register_converter_rule("contentstate", feature_name, db_conversion)
 
 @hooks.register("register_rich_text_features")
 def register_html_styling(features):
-    register_inline_styling(
-        features=features,
-        feature_name="html",
-        description="Verbatim html",
-        type_="HTML",
-        format='class="verbatim-html"',
-        label="ℋ",
-        editor_style={
-            "background-color": "orange",
-            "color": "#222",
-            "font-family": "monospace",
-            "font-size": "0.9rem",
-            "font-weight": "bold",
+    feature_name = "html"
+    type_ = "HTML"
+    css_class = "verbatim-html"
+    element = "div"
+    control = {
+        "type": type_,
+        "description": "Verbatim html",
+        "element": element,
+        "label": "ℋ",
+    }
+    features.register_editor_plugin(
+        "draftail",
+        feature_name,
+        draftail_features.BlockFeature(control),
+    )
+    block_map = {"element": element, "props": {"class": css_class}}
+    features.register_converter_rule(
+        "contentstate",
+        feature_name,
+        {
+            "from_database_format": {f"{element}[class={css_class}]": HTMLBlockElementHandler(type_)},
+            "to_database_format": {"block_map": {type_: block_map}},
         },
     )
 ```
 
-The above will add allow you to add an HTML type with an ℋ button on your toolbar. When you select some text and press the ℋ button it will change it to monospace and add an orange background. What you selected will be rendered inside a `<span class='verbatim-html' />` element. 
+The above will add allow you to add an HTML type with an ℋ button on your toolbar. When you select some text and press the ℋ button it will apply a style to it and put it inside a `<span class='verbatim-html' />` element. The conents of that element will then be cleaned (using bleach) before rendering, see `HTMLBlockElementHandler`. You can select which elements will be whitelisted there.
 
-2. Add this to your global styles to hide whatever's inside the verbatim-html class: 
+2. Add this to your global styles css to hide whatever's inside the verbatim-html class: 
 
 ```css
 .verbatim-html {
@@ -410,7 +409,21 @@ The above will add allow you to add an HTML type with an ℋ button on your tool
 }
 ```
 
-3. Add this to your global js:
+3. Add this to your wagatil-hooks to style the contents of the HTML block in the wagtail editor (so they'll have a monospace font and an orange bg):
+
+```python
+@hooks.register("insert_global_admin_css", order=100)
+def global_admin_css():
+    return """
+        <style>
+            .Draftail-block--HTML {
+                background-color: orange;
+                font-family: monospace;
+            }
+        </style>
+        """
+
+4. Add this to your global js to change the contents of `verbatim-html` from text to HTML and change the element class to `verbatim-html-rendered`:
 
 ```javascript
 $(function() {
@@ -424,11 +437,8 @@ $(function() {
 })
 ```
 
-to change the contents of `verbatim-html` from text to html and change the class to `verbatim-html-rendered`. 
 
-**WARNING**: I suggest you do some sanitization to the HTML elements you'll allow there unless you really trust your editors. You've been warned!
-
-4. Add the 'html' type to your `WAGTAILADMIN_RICH_TEXT_EDITORS` features (see previous question) like:
+5. Add the 'html' type to your `WAGTAILADMIN_RICH_TEXT_EDITORS` features to enable it (see previous question) like:
 
 ```python
 WAGTAILADMIN_RICH_TEXT_EDITORS = {
@@ -452,7 +462,6 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
                 "link",
                 "document-link",
                 "image",
-                # "anchor",
                 "embed",
                 "blockquote",
                 "html",
@@ -462,7 +471,7 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
 }
 ```
 
-5. PROFIT!
+6. PROFIT!
 
 Pages
 -----
